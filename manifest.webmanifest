@@ -1,0 +1,15 @@
+{
+  "name": "ironmate",
+  "short_name": "IronMate",
+  "description": "30-day iron-rich Indian meal plan and daily tracker for the two of you.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F1F3",
+  "theme_color": "#B3123F",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
