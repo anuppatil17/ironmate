@@ -135,6 +135,229 @@ const NONVEG = {
   ],
 };
 
+/* ------------------------------------------------------------------ */
+/* Nutrition estimates                                                 */
+/*                                                                     */
+/* FOODS: per 100 g of the raw, edible food.                           */
+/*   fe = iron (mg), c = vitamin C (mg), p = protein (g), k = kcal     */
+/* Values are from the Indian Food Composition Tables 2017 (ICMR-NIN)  */
+/* where the food is listed there, and from USDA FoodData Central for  */
+/* a few others (kiwi, pumpkin and sunflower seeds, dried figs and     */
+/* apricots, soya chunks). Animal foods are typical lean-cut values.   */
+/* They are estimates: real food changes with variety, recipe and      */
+/* portion size.                                                       */
+/* ------------------------------------------------------------------ */
+
+export const FOODS = {
+  // cereals and millets
+  ragi: { fe: 4.62, c: 0, p: 7.2, k: 321 }, bajra: { fe: 6.42, c: 0, p: 11.0, k: 348 }, jowar: { fe: 3.95, c: 0, p: 10.0, k: 334 },
+  rice: { fe: 0.65, c: 0, p: 7.9, k: 356 }, poha: { fe: 4.46, c: 0, p: 7.4, k: 353 }, atta: { fe: 4.1, c: 0, p: 10.6, k: 320 },
+  dalia: { fe: 3.97, c: 0, p: 10.6, k: 322 }, rajgira: { fe: 8.02, c: 0, p: 13.3, k: 356 }, bread: { fe: 2.5, c: 0, p: 9.0, k: 250 },
+  // pulses
+  urad: { fe: 4.67, c: 0, p: 23.1, k: 325 }, moong_dal: { fe: 3.9, c: 0, p: 23.9, k: 326 }, moong_whole: { fe: 4.9, c: 0, p: 22.5, k: 294 },
+  toor: { fe: 3.9, c: 0, p: 21.7, k: 331 }, masoor: { fe: 7.06, c: 0, p: 24.4, k: 322 }, chana_dal: { fe: 6.08, c: 0, p: 21.6, k: 329 },
+  kala_chana: { fe: 6.78, c: 0, p: 18.8, k: 287 }, kabuli: { fe: 6.78, c: 0, p: 18.8, k: 287 }, rajma: { fe: 6.13, c: 0, p: 19.9, k: 299 },
+  lobia: { fe: 5.0, c: 0, p: 21.2, k: 320 }, matki: { fe: 7.9, c: 0, p: 19.8, k: 291 }, soya_chunks: { fe: 9.0, c: 0, p: 52, k: 345 },
+  besan: { fe: 5.3, c: 0, p: 21.6, k: 330 }, roasted_chana: { fe: 6.8, c: 0, p: 21, k: 355 }, peas: { fe: 1.5, c: 37, p: 7.2, k: 81 },
+  // nuts, seeds, dried fruit, sweeteners, fat
+  peanut: { fe: 3.4, c: 0, p: 23.7, k: 520 }, sesame: { fe: 15.04, c: 0, p: 21.7, k: 507 }, pumpkin_seed: { fe: 8.8, c: 0, p: 30, k: 559 },
+  sunflower_seed: { fe: 5.2, c: 0, p: 20.8, k: 584 }, almond: { fe: 4.59, c: 0, p: 18.4, k: 609 }, walnut: { fe: 2.9, c: 0, p: 14.9, k: 671 },
+  dates: { fe: 4.79, c: 0, p: 2.5, k: 320 }, raisin_black: { fe: 6.81, c: 0, p: 2.6, k: 300 }, fig_dried: { fe: 2.0, c: 0, p: 3.3, k: 249 },
+  apricot_dried: { fe: 2.7, c: 0, p: 3.4, k: 241 }, jaggery: { fe: 4.63, c: 0, p: 1.9, k: 354 }, sugar: { fe: 0, c: 0, p: 0, k: 400 }, oil: { fe: 0, c: 0, p: 0, k: 900 },
+  // vegetables
+  spinach: { fe: 2.95, c: 30, p: 2.1, k: 24 }, methi: { fe: 5.69, c: 58, p: 3.7, k: 34 }, amaranth_leaves: { fe: 4.6, c: 84, p: 3.3, k: 30 },
+  drumstick: { fe: 0.73, c: 72, p: 2.6, k: 30 }, beetroot: { fe: 0.76, c: 5, p: 1.9, k: 35 }, tomato: { fe: 0.22, c: 25, p: 0.9, k: 20 },
+  capsicum: { fe: 0.4, c: 123, p: 1.1, k: 16 }, cabbage: { fe: 0.3, c: 33, p: 1.4, k: 22 }, onion: { fe: 0.5, c: 6, p: 1.5, k: 48 },
+  carrot: { fe: 0.6, c: 6, p: 1.0, k: 33 }, cucumber: { fe: 0.4, c: 6, p: 0.8, k: 20 }, lauki: { fe: 0.3, c: 4, p: 0.5, k: 11 },
+  bhindi: { fe: 0.84, c: 22, p: 2.1, k: 28 }, beans: { fe: 1.0, c: 11, p: 2.5, k: 26 }, mixed_veg: { fe: 0.6, c: 15, p: 1.5, k: 30 },
+  green_chutney: { fe: 3.0, c: 20, p: 3.0, k: 45 }, lemon: { fe: 0.1, c: 48, p: 0.4, k: 25 },
+  // fruit
+  guava: { fe: 0.3, c: 214, p: 1.4, k: 44 }, amla: { fe: 1.0, c: 252, p: 0.4, k: 25 }, orange: { fe: 0.2, c: 43, p: 0.7, k: 37 },
+  mosambi: { fe: 0.2, c: 47, p: 0.7, k: 30 }, papaya: { fe: 0.2, c: 43, p: 0.4, k: 24 }, kiwi: { fe: 0.3, c: 90, p: 1.1, k: 61 },
+  pineapple: { fe: 0.3, c: 36, p: 0.5, k: 43 }, pomegranate: { fe: 0.3, c: 12, p: 1.3, k: 55 },
+  // animal foods
+  egg: { fe: 1.8, c: 0, p: 13.3, k: 135 }, chicken: { fe: 0.9, c: 0, p: 21.8, k: 150 }, fish: { fe: 1.0, c: 0, p: 19.7, k: 100 }, mutton: { fe: 2.5, c: 0, p: 21.0, k: 125 },
+};
+
+/** Daily need used for the percentages: ICMR-NIN 2020 values for an adult woman who is not pregnant. */
+export const DAILY_NEED = { fe: 29, c: 65, p: 46 };
+export const DAILY_NEED_NOTE = 'Daily need used here: iron 29 mg, vitamin C 65 mg, protein 46 g (ICMR-NIN 2020, adult woman). Your own need may differ.';
+
+// One recipe per meal, in the same order as the meal lists above.
+// "food:grams" is the raw weight in one serving. A star means the food is cooked,
+// so only half of its vitamin C is counted. The vitamin C pairing is part of the recipe.
+const RECIPES = {
+  breakfast: {
+    veg: [
+      'ragi:50 urad:15 oil:5 peanut:15 sesame:8 orange:130',
+      'poha:60 peanut:10 peas:20* onion:20* oil:5 lemon:10 guava:100',
+      'moong_dal:60 methi:20* oil:5 green_chutney:30 lemon:5 papaya:70',
+      'bajra:40 atta:20 methi:20* oil:6 tomato:40* lemon:25 sugar:10',
+      'moong_whole:40 kala_chana:25 onion:20 tomato:40 lemon:10 orange:130',
+      'rajgira:45 dates:16 sesame:5 mosambi:150',
+      'dalia:55 peanut:10 peas:20* mixed_veg:40* oil:5 kiwi:70',
+      'besan:60 spinach:40* tomato:30* oil:5 green_chutney:30 amla:30',
+      'rice:50 urad:20 toor:20 drumstick:30* mixed_veg:30* oil:3 tomato:40* guava:100',
+      'atta:60 spinach:50* oil:6 tomato:40* lemon:25 sugar:10',
+    ],
+    nonveg: [
+      'egg:100 tomato:40* capsicum:30* onion:20* atta:50 oil:6 orange:130',
+      'egg:100 spinach:40* bread:60 oil:5 tomato:60 lemon:5 guava:100',
+      'egg:100 poha:40 peanut:8 oil:4 lemon:10 papaya:70',
+    ],
+  },
+  mid: {
+    veg: [
+      'guava:100 pumpkin_seed:10',
+      'amla:30 dates:16',
+      'orange:130 roasted_chana:20',
+      'pomegranate:150 almond:6 lemon:5',
+      'lemon:25 sugar:10 sesame:10 jaggery:10',
+      'kiwi:70 raisin_black:12',
+      'papaya:140 sunflower_seed:9',
+      'beetroot:80 carrot:80 amla:20',
+      'mosambi:150 peanut:11 jaggery:9',
+      'pineapple:150 roasted_chana:20',
+    ],
+    nonveg: [],
+  },
+  lunch: {
+    veg: [
+      'toor:30 spinach:50* oil:5 bajra:70 rice:25 beetroot:60 carrot:40 lemon:8',
+      'rajma:40 tomato:40* onion:20* oil:6 rice:50 cucumber:50 tomato:40 onion:20 lemon:8 capsicum:60*',
+      'kabuli:40 tomato:40* onion:20* oil:6 atta:60 onion:30 tomato:50 lemon:10',
+      'lobia:40 tomato:30* oil:5 jowar:70 cabbage:40* capsicum:30* oil:3 lemon:8 tomato:50',
+      'moong_dal:30 methi:30* oil:5 atta:60 lauki:80* oil:3 tomato:50 cucumber:50 lemon:8',
+      'toor:30 drumstick:40* mixed_veg:50* oil:5 rice:50 beans:70* oil:3 tomato:80 lemon:8',
+      'soya_chunks:25 tomato:40* capsicum:30* onion:20* oil:6 atta:60 cucumber:50 tomato:50 lemon:8',
+      'kala_chana:40 tomato:30* oil:5 bajra:70 amaranth_leaves:70* oil:3 lemon:8',
+      'masoor:30 tomato:20* oil:5 lemon:8 rice:50 bhindi:70* oil:3 tomato:60 cucumber:40',
+      'matki:40 onion:20* tomato:20* oil:5 jowar:70 tomato:50 onion:30 lemon:10',
+    ],
+    nonveg: [
+      'chicken:100 tomato:40* onion:30* oil:8 atta:60 cucumber:50 tomato:40 onion:20 lemon:8',
+      'fish:100 tomato:50* oil:8 rice:50 spinach:70* oil:3 lemon:8',
+      'egg:100 tomato:40* onion:30* oil:7 atta:60 cucumber:50 tomato:40 lemon:8',
+      'mutton:80 tomato:30* onion:30* oil:6 bajra:70 onion:30 tomato:50 lemon:10',
+      'mutton:80 peas:40* tomato:30* oil:6 atta:60 cucumber:50 tomato:40 lemon:10',
+      'chicken:100 spinach:80* oil:7 rice:50 tomato:50 cucumber:50 lemon:8',
+    ],
+  },
+  snack: {
+    veg: [
+      'roasted_chana:20 peanut:10 jaggery:8 lemon:25 sugar:10',
+      'moong_whole:30 tomato:40 onion:20 lemon:10',
+      'sesame:13 jaggery:12 orange:130',
+      'dates:24 walnut:8 guava:100',
+      'beetroot:80* besan:15 oil:5 green_chutney:30 lemon:5 tomato:50',
+      'peanut:20 roasted_chana:20 onion:20 tomato:40 lemon:10',
+      'ragi:15 jaggery:9 oil:5 lemon:25 sugar:10',
+      'kala_chana:35 tomato:40 onion:15 lemon:10',
+      'tomato:120* beetroot:50* oil:2 roasted_chana:20 lemon:5',
+      'raisin_black:8 fig_dried:16 apricot_dried:14 mosambi:150',
+    ],
+    nonveg: [
+      'egg:50 tomato:60 lemon:5',
+      'chicken:40 mixed_veg:20* lemon:5',
+    ],
+  },
+  dinner: {
+    veg: [
+      'rice:40 moong_dal:30 spinach:50* oil:5 tomato:60 lemon:8',
+      'atta:50 besan:10 methi:20* oil:6 chana_dal:25 lauki:80* oil:4 lemon:8 tomato:50',
+      'bajra:40 moong_dal:25 mixed_veg:50* oil:5 cucumber:50 tomato:50 onion:20 lemon:8',
+      'kabuli:35 spinach:80* oil:6 jowar:70 tomato:40 cucumber:40 lemon:8',
+      'moong_dal:8 toor:8 chana_dal:8 masoor:8 urad:6 oil:5 lemon:5 atta:60 capsicum:40* tomato:40* oil:3',
+      'ragi:70 moong_dal:30 oil:5 tomato:50 cucumber:50 lemon:8',
+      'toor:35 atta:40 peanut:5 oil:6 lemon:8 tomato:60',
+      'tomato:80* toor:10 rice:50 lobia:25 beetroot:60* oil:5 lemon:8',
+      'masoor:35 tomato:30* oil:4 lemon:8 atta:40 bajra:20 beans:40* capsicum:30* oil:3',
+      'rice:55 soya_chunks:20 peas:30* oil:6 tomato:50 onion:30 lemon:8',
+    ],
+    nonveg: [
+      'fish:100 oil:6 lemon:8 atta:30 mixed_veg:100* oil:3',
+      'chicken:100 mixed_veg:80* tomato:30* oil:5 lemon:5 atta:60',
+      'egg:100 tomato:30* onion:20* oil:6 atta:60 tomato:50 cucumber:50 lemon:8',
+      'chicken:100 tomato:40* onion:30* oil:8 rice:50 cucumber:50 tomato:40 lemon:8',
+    ],
+  },
+};
+
+// Give every meal a stable id (for example "lunch-v3" or "dinner-n1"), its slot and its recipe.
+// Do not reorder the meal lists: saved choices point to these ids.
+const MEALS = {};
+for (const s of SLOTS) {
+  VEG[s.key].forEach((m, i) => { m.id = `${s.key}-v${i + 1}`; m.slot = s.key; m.nonveg = false; m.r = RECIPES[s.key].veg[i]; MEALS[m.id] = m; });
+  (NONVEG[s.key] || []).forEach((m, i) => { m.id = `${s.key}-n${i + 1}`; m.slot = s.key; m.nonveg = true; m.r = RECIPES[s.key].nonveg[i]; MEALS[m.id] = m; });
+}
+
+export function mealById(id) { return MEALS[id] || null; }
+
+/** Every meal a person may pick for a slot. Non-veg meals are offered only on the veg + non-veg plan. */
+export function optionsFor(slot, diet = 'veg') {
+  const veg = VEG[slot] || [];
+  return diet === 'nonveg' ? veg.concat(NONVEG[slot] || []) : veg.slice();
+}
+
+export function parseRecipe(r) {
+  return String(r || '').split(/\s+/).filter(Boolean).map((part) => {
+    const cooked = part.endsWith('*');
+    const [food, grams] = (cooked ? part.slice(0, -1) : part).split(':');
+    return { food, grams: Number(grams), cooked };
+  });
+}
+
+const nutritionCache = new Map();
+/** Estimated nutrients in one serving of a meal: iron (mg), vitamin C (mg), protein (g), energy (kcal). */
+export function nutrition(meal) {
+  const id = meal && meal.id;
+  if (id && nutritionCache.has(id)) return nutritionCache.get(id);
+  const t = { fe: 0, c: 0, p: 0, kcal: 0 };
+  for (const { food, grams, cooked } of parseRecipe(meal && meal.r)) {
+    const f = FOODS[food];
+    if (!f || !(grams > 0)) continue;
+    const x = grams / 100;
+    t.fe += f.fe * x;
+    t.c += f.c * x * (cooked ? 0.5 : 1);
+    t.p += f.p * x;
+    t.kcal += f.k * x;
+  }
+  const out = { fe: Math.round(t.fe * 10) / 10, c: Math.round(t.c), p: Math.round(t.p), kcal: Math.round(t.kcal / 10) * 10 };
+  if (id) nutritionCache.set(id, out);
+  return out;
+}
+
+/** Share of the daily need, in percent. Can be above 100. */
+export function needPct(n) {
+  return { fe: Math.round((n.fe / DAILY_NEED.fe) * 100), c: Math.round((n.c / DAILY_NEED.c) * 100), p: Math.round((n.p / DAILY_NEED.p) * 100) };
+}
+
+/** The meal for one slot on one day: her own pick if she made one, else the plan. */
+export function dayMeal(day, journeyDayNum, diet, slot) {
+  const pick = day && day.picks ? mealById(day.picks[slot]) : null;
+  if (pick && pick.slot === slot && (diet === 'nonveg' || !pick.nonveg)) return { ...pick, picked: true };
+  const p = planDay(journeyDayNum, diet)[slot];
+  return { ...chosenMeal(p, !!(day && day.swaps && day.swaps[slot])), picked: false };
+}
+
+/**
+ * Nutrient totals for a day.
+ *   planned: if all five meals are eaten in full
+ *   eaten:   from the log (eaten = full serving, partly eaten = half, skipped or not logged = none)
+ */
+export function dayNutrition(day, journeyDayNum, diet) {
+  const zero = () => ({ fe: 0, c: 0, p: 0, kcal: 0 });
+  const planned = zero(), eaten = zero();
+  for (const s of SLOTS) {
+    const n = nutrition(dayMeal(day, journeyDayNum, diet, s.key));
+    const st = day && day.meals ? day.meals[s.key] : undefined;
+    const w = STATUS[st] ? STATUS[st].score : 0;
+    for (const k of ['fe', 'c', 'p', 'kcal']) { planned[k] += n[k]; eaten[k] += n[k] * w; }
+  }
+  const tidy = (t) => ({ fe: Math.round(t.fe * 10) / 10, c: Math.round(t.c), p: Math.round(t.p), kcal: Math.round(t.kcal / 10) * 10 });
+  return { planned: tidy(planned), eaten: tidy(eaten) };
+}
+
 // In the non-veg plan, one meal a day is non-veg. One day a week stays fully veg.
 const NONVEG_WEEK = ['lunch', 'breakfast', 'dinner', 'lunch', 'snack', 'dinner', null];
 
@@ -441,6 +664,11 @@ export function cleanDay(doc) {
   if (d.meals && typeof d.meals === 'object') {
     out.meals = {};
     for (const s of SLOTS) if (STATUS[d.meals[s.key]]) out.meals[s.key] = d.meals[s.key];
+  }
+  if (d.picks && typeof d.picks === 'object') {
+    out.picks = {};
+    for (const s of SLOTS) { const m = mealById(d.picks[s.key]); if (m && m.slot === s.key) out.picks[s.key] = m.id; }
+    if (!Object.keys(out.picks).length) delete out.picks;
   }
   if (d.swaps && typeof d.swaps === 'object') {
     out.swaps = {};

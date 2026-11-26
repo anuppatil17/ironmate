@@ -282,23 +282,58 @@ export function startApp(store, root) {
     return ageH <= 72 ? c : null;
   }
 
+  const fe1 = (v) => (Math.round(v * 10) / 10).toFixed(1);
+  function nutriRows(n) {
+    const q = C.needPct(n);
+    const row = (cls, label, value, pct) => `<div class="nu ${cls}"><span class="nu-l">${label}</span><span class="nu-bar" aria-hidden="true"><i style="width:${Math.max(2, Math.min(100, pct))}%"></i></span><span class="nu-v num">${value} · <b>${pct}%</b></span></div>`;
+    return `<div class="nutri" role="group" aria-label="Estimated nutrients and share of daily need">
+      ${row('fe-row', 'Iron', fe1(n.fe) + ' mg', q.fe)}
+      ${row('c-row', 'Vitamin C', n.c + ' mg', q.c)}
+      ${row('p-row', 'Protein', n.p + ' g', q.p)}
+    </div>`;
+  }
+  function nutriBlock(meal) {
+    const n = C.nutrition(meal);
+    return `${nutriRows(n)}<p class="fe">About <span class="num">${n.kcal}</span> kcal. The % is the share of one day's need. Estimate.</p>`;
+  }
+  function nutriLine(meal) {
+    const n = C.nutrition(meal), q = C.needPct(n);
+    return `<p class="small num">Iron <b>${fe1(n.fe)} mg</b> (${q.fe}%) · Vitamin C <b>${n.c} mg</b> (${q.c}%) · Protein <b>${n.p} g</b> (${q.p}%) · ${n.kcal} kcal</p>`;
+  }
+  function daySummaryCard(date, title) {
+    const c = cfg();
+    const j = journeyInfo(date);
+    const day = S().days[date] || {};
+    const t = C.dayNutrition(day, j.planDay, c.diet);
+    const ms = C.mealStats(day);
+    const pq = C.needPct(t.planned);
+    return `<section class="card">
+      <div class="card-head"><h2>${title}</h2><span class="meta num">${ms.logged}/5 meals logged</span></div>
+      <p class="muted small">From the meals logged so far. Eaten counts as a full serving, partly eaten as half.</p>
+      ${nutriRows(t.eaten)}
+      <p class="fe">About <span class="num">${t.eaten.kcal}</span> kcal so far.</p>
+      <div class="banner"><span class="ico">=</span><div><b>If all five chosen meals are eaten:</b> <span class="num">iron ${fe1(t.planned.fe)} mg (${pq.fe}%), vitamin C ${t.planned.c} mg (${pq.c}%), protein ${t.planned.p} g (${pq.p}%), about ${t.planned.kcal} kcal.</span></div></div>
+      <p class="muted small">These are estimates from Indian food tables (IFCT 2017). ${C.DAILY_NEED_NOTE} The numbers show what is in the food, not how much iron the body takes in, and not your Hb.</p>
+    </section>`;
+  }
+
   function mealCard(date, slot, editable) {
     const c = cfg();
     const j = journeyInfo(date);
     const day = S().days[date] || {};
-    const p = C.planDay(j.planDay, c.diet)[slot.key];
-    const swapped = !!(day.swaps && day.swaps[slot.key]);
-    const meal = C.chosenMeal(p, swapped);
+    const meal = C.dayMeal(day, j.planDay, c.diet, slot.key);
+    const nOpts = C.optionsFor(slot.key, c.diet).length;
     const st = day.meals && day.meals[slot.key];
     const seg = Object.keys(C.STATUS).map((k) => `<button data-act="meal" data-slot="${slot.key}" data-st="${k}" aria-pressed="${st === k}" ${editable ? '' : 'disabled'}><span class="g" aria-hidden="true">${ST_GLYPH[k]}</span>${ST_SHORT[k]}</button>`).join('');
     return `<article class="card meal ${st ? 'st-' + st : ''}">
-      <div class="meal-head"><span class="slot">${slot.label}</span><span>${C.fmtTime(c.times[slot.key])}</span>${meal.nonveg ? '<span class="tag">Non-veg</span>' : ''}${swapped ? '<span class="tag">Veg option</span>' : ''}</div>
+      <div class="meal-head"><span class="slot">${slot.label}</span><span>${C.fmtTime(c.times[slot.key])}</span>${meal.nonveg ? '<span class="tag">Non-veg</span>' : ''}${meal.picked ? '<span class="tag">Your choice</span>' : ''}</div>
       <h3>${esc(meal.n)}</h3>
       <div class="kv"><span class="k" aria-hidden="true">Qty</span><div><small>How much</small>${esc(meal.q)}</div></div>
       <div class="kv vitc"><span class="k" aria-hidden="true">C</span><div><small>Vitamin C pairing</small>${esc(meal.c)}</div></div>
       <p class="fe">Iron from: ${esc(meal.fe)}</p>
+      ${nutriBlock(meal)}
       <div class="seg" role="group" aria-label="${slot.label} status">${seg}</div>
-      ${p.nonveg && editable ? `<button class="link" data-act="swap" data-slot="${slot.key}">${swapped ? 'Show the non-veg meal again' : 'Use the vegetarian option today'}</button>` : ''}
+      ${editable ? `<button class="btn sm" data-act="options" data-slot="${slot.key}">Choose another meal (${nOpts} options)</button>` : ''}
     </article>`;
   }
 
@@ -340,6 +375,9 @@ export function startApp(store, root) {
     return `${dateNav()}${top}
       <div class="sec-title">Meals · day ${j.planDay} · <span class="num">${ms.logged}/5</span> logged</div>
       ${C.SLOTS.map((s) => mealCard(date, s, edit)).join('')}
+
+      <div class="sec-title">Food nutrients</div>
+      ${daySummaryCard(date, date === t ? 'From food today' : 'From food this day')}
 
       <div class="sec-title">Water</div>
       <section class="card">
@@ -390,10 +428,9 @@ export function startApp(store, root) {
     const ms = C.mealStats(day);
     const ws = C.waterStats(day, c.waterGoal);
     const mv = C.moveStats(day, c.moveGoal);
-    const plan = C.planDay(j.planDay, c.diet);
     const meals = C.SLOTS.map((s) => {
       const st = day.meals && day.meals[s.key];
-      const meal = C.chosenMeal(plan[s.key], !!(day.swaps && day.swaps[s.key]));
+      const meal = C.dayMeal(day, j.planDay, c.diet, s.key);
       return `<div class="li"><div class="grow"><div class="t">${s.short} <span class="s num">${C.fmtTime(c.times[s.key])}</span></div><div class="s">${esc(meal.n)}</div></div><span class="pill ${st || ''}">${st ? ST_GLYPH[st] + ' ' + ST_SHORT[st] : 'Not logged'}</span></div>`;
     }).join('');
     const symptoms = C.SYMPTOMS.map((s) => {
@@ -411,6 +448,7 @@ export function startApp(store, root) {
         ${meter('Water', `${ws.glasses}<small>/${ws.goal}</small>`, ws.pct, `${ws.litres} L`)}
         ${meter('Movement', `${mv.total}<small> min</small>`, mv.pct, `goal ${mv.goal} min`)}
       </div>
+      ${daySummaryCard(date, 'Nutrients from food')}
       <section class="card">
         <h2>How she feels</h2>
         <div class="list">${symptoms}${day.period ? `<div class="li"><span>Period</span><span class="pill">Yes</span></div>` : ''}</div>
@@ -457,8 +495,9 @@ export function startApp(store, root) {
       const one = (m, tag) => `<h3>${esc(m.n)}</h3>${tag ? `<div><span class="tag">${tag}</span></div>` : ''}
         <div class="kv"><span class="k" aria-hidden="true">Qty</span><div><small>How much</small>${esc(m.q)}</div></div>
         <div class="kv vitc"><span class="k" aria-hidden="true">C</span><div><small>Vitamin C pairing</small>${esc(m.c)}</div></div>
-        <p class="fe">Iron from: ${esc(m.fe)}</p>`;
-      return `<article class="card meal"><div class="meal-head"><span class="slot">${s.label}</span><span>${C.fmtTime(c.times[s.key])}</span></div>
+        <p class="fe">Iron from: ${esc(m.fe)}</p>
+        ${nutriBlock(m)}`;
+      return `<article class="card meal"><div class="meal-head"><span class="slot">${s.label}</span><span>${C.fmtTime(c.times[s.key])}</span><span class="tag">${C.optionsFor(s.key, c.diet).length} options on the day</span></div>
         ${p.nonveg ? one(p.nonveg, 'Non-veg') + `<details><summary class="link">Vegetarian option</summary><div class="stack" style="padding-top:10px">${one(p.veg, '')}</div></details>` : one(p.veg, '')}
       </article>`;
     }).join('');
@@ -483,6 +522,7 @@ export function startApp(store, root) {
       <div class="daygrid">${grid}</div>
       <div class="sec-title">Day ${sel}${j.jd >= 1 ? ' · ' + C.fmtDate(C.addDays(j.roundStart, sel - 1)) : ''}</div>
       ${meals}
+      ${(() => { const tp = C.dayNutrition({}, sel, c.diet).planned; return `<section class="card"><h2>Day ${sel} in total</h2><p class="muted small">If all five planned meals are eaten in full.</p>${nutriRows(tp)}<p class="fe">About <span class="num">${tp.kcal}</span> kcal. ${C.DAILY_NEED_NOTE}</p><p class="muted small">Even an iron-rich food plan often gives less than the full daily iron need. This is one reason to keep the doctor visits and blood tests.</p></section>`; })()}
       <div class="sec-title">Six daily rules</div>
       <section class="card"><ol class="rules">${C.RULES.map((r) => `<li><div><b>${r.t}</b><span>${r.d}</span></div></li>`).join('')}</ol></section>
       <p class="foot">1 katori is a small bowl, about 150 ml. This is a general food plan. It is not medical treatment. If you have another health condition or a food allergy, check the plan with your doctor or dietitian.</p>`;
@@ -734,6 +774,53 @@ export function startApp(store, root) {
   }
   const sheetActions = (label) => `<p class="err" role="alert"></p><div class="actions"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">${label}</button></div>`;
 
+  function optionsSheet(slot) {
+    const c = cfg();
+    const date = ui.date;
+    const j = journeyInfo(date);
+    const day = S().days[date] || {};
+    const current = C.dayMeal(day, j.planDay, c.diet, slot);
+    const planned = C.dayMeal({}, j.planDay, c.diet, slot);
+    const label = C.SLOTS.find((x) => x.key === slot).label;
+    const list = C.optionsFor(slot, c.diet).slice().sort((a, b) => (b.id === planned.id) - (a.id === planned.id) || C.nutrition(b).fe - C.nutrition(a).fe);
+    const cards = list.map((m) => {
+      const isCur = m.id === current.id;
+      return `<article class="opt ${isCur ? 'is-current' : ''}">
+        <div class="meal-head">${m.id === planned.id ? '<span class="tag">Planned for this day</span>' : ''}${m.nonveg ? '<span class="tag">Non-veg</span>' : ''}</div>
+        <h3>${esc(m.n)}</h3>
+        <p class="small"><b>How much:</b> ${esc(m.q)}</p>
+        <p class="small"><b>Vitamin C pairing:</b> ${esc(m.c)}</p>
+        ${nutriRows(C.nutrition(m))}
+        <p class="fe">About <span class="num">${C.nutrition(m).kcal}</span> kcal</p>
+        ${isCur ? '<span class="pill eaten">✓ Chosen</span>' : `<button type="button" class="btn sm primary" data-pick="${m.id}">Choose this</button>`}
+      </article>`;
+    }).join('');
+    closeSheet(true);
+    sheetEl = document.createElement('div');
+    sheetEl.className = 'sheet-back';
+    sheetEl.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-label="Options for ${label}">
+      <h2>Choose your ${label.toLowerCase()}</h2>
+      <p class="muted small">${list.length} options, highest iron first. The % is the share of one day's need in one serving. All numbers are estimates.</p>
+      ${c.diet === 'nonveg' ? '<p class="muted small">Iron from egg, chicken, fish and mutton is taken in more easily than iron from plants. A lower number there can still help.</p>' : ''}
+      <div class="opts">${cards}</div>
+      <button type="button" class="btn block" data-close>Close</button>
+    </div>`;
+    document.body.appendChild(sheetEl);
+    sheetEl.addEventListener('click', (e) => {
+      if (e.target === sheetEl || e.target.closest('[data-close]')) return closeSheet();
+      const b = e.target.closest('[data-pick]');
+      if (!b) return;
+      const id = b.dataset.pick;
+      editDay(date, (d) => {
+        d.picks = d.picks || {};
+        if (id === planned.id) delete d.picks[slot]; else d.picks[slot] = id;
+        if (d.swaps) delete d.swaps[slot];
+      });
+      closeSheet();
+      toast('Meal changed');
+    });
+  }
+
   function labSheet() {
     openSheet(`<h2>Add a blood test result</h2>
       <p class="muted small">Copy the numbers from the lab report. Fill in what was tested.</p>
@@ -861,7 +948,7 @@ export function startApp(store, root) {
         return render(true);
       }
       case 'meal': editDay(date, (day) => { day.meals = day.meals || {}; if (day.meals[el.dataset.slot] === el.dataset.st) delete day.meals[el.dataset.slot]; else day.meals[el.dataset.slot] = el.dataset.st; }); return render(true);
-      case 'swap': editDay(date, (day) => { day.swaps = day.swaps || {}; if (day.swaps[el.dataset.slot]) delete day.swaps[el.dataset.slot]; else day.swaps[el.dataset.slot] = true; }); return render(true);
+      case 'options': return optionsSheet(el.dataset.slot);
       case 'water': editDay(date, (day) => { day.water = Math.max(0, Math.min(30, (Number(day.water) || 0) + Number(el.dataset.d))); }); return render(true);
       case 'walk-add': editDay(date, (day) => { day.walkMin = Math.min(600, (Number(day.walkMin) || 0) + Number(el.dataset.d)); }); return render(true);
       case 'ex-add': return exerciseSheet();
